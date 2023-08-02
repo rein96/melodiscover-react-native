@@ -80,6 +80,13 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+            manifestPlaceholders = [
+                // Consider to change to `com.phrasewizard.auth` for example when facing problem
+                // integrating with deeplinking react-navigation
+                // https://github.com/FormidableLabs/react-native-app-auth#android-setup
+                // https://github.com/FormidableLabs/react-native-app-auth/issues/494#issuecomment-797394994
+                appAuthRedirectScheme: 'com.phrasewizard'
+            ]
     }
     signingConfigs {
         debug {
