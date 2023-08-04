@@ -29,6 +29,7 @@ const borderRadii = {
 };
 
 // #1C51EF
+// #121212
 const lightColors = {
   // workaround for shadow colors, that needs opacity
   borderSecondary: '#00000033',
@@ -113,7 +114,7 @@ const darkColors = {
   borderShadowXs: '#ffffff1A',
 
   canvasDanger: '#E54040',
-  canvasPrimary: '#090A0B',
+  canvasPrimary: '#121212',
   canvasProduct: '#1C51EF',
   canvasSecondary: '#16191D',
   canvasShadow: '#1B1E22',
