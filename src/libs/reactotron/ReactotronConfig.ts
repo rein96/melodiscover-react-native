@@ -1,11 +1,23 @@
 import Reactotron, {networking} from 'reactotron-react-native';
 import mmkvPlugin from 'reactotron-react-native-mmkv';
+import {QueryClientManager, reactotronReactQuery} from 'reactotron-react-query';
 import {storage} from '../react-native-mmkv/mmkv';
+import {queryClient} from '../../libs/react-query/queryClient';
+
+const queryClientManager = new QueryClientManager({
+  queryClient,
+});
 
 Reactotron.configure({name: 'Melodiscover'}) // controls connection & communication settings
-  .useReactNative() // add all built-in react native plugins
   .use(networking())
   .use(mmkvPlugin({storage}))
+  .use(reactotronReactQuery(queryClientManager))
+  .configure({
+    onDisconnect: () => {
+      queryClientManager.unsubscribe();
+    },
+  })
+  .useReactNative() // add all built-in react native plugins
   .connect(); // let's connect!
 
 const yeOldeConsoleLog = console.log;
