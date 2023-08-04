@@ -7,6 +7,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import SettingsScreen from './src/settings/screens/SettingsScreen';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import ThemeProvider from './src/theme/ThemeProvider';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -18,21 +19,26 @@ const MainTabs = () => (
   </Tab.Navigator>
 );
 
+// Create a client
+const queryClient = new QueryClient();
+
 const App = () => {
   const [authenticated] = React.useState(true);
 
   return (
     <ThemeProvider>
       <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{headerShown: false}}>
-            {authenticated ? (
-              <Stack.Screen component={MainTabs} name="Main" />
-            ) : (
-              <Stack.Screen component={LoginScreen} name="Login" />
-            )}
-          </Stack.Navigator>
-        </NavigationContainer>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{headerShown: false}}>
+              {authenticated ? (
+                <Stack.Screen component={MainTabs} name="Main" />
+              ) : (
+                <Stack.Screen component={LoginScreen} name="Login" />
+              )}
+            </Stack.Navigator>
+          </NavigationContainer>
+        </QueryClientProvider>
       </SafeAreaProvider>
     </ThemeProvider>
   );
