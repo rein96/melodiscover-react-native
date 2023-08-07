@@ -4,6 +4,7 @@ module.exports = {
     'prettier',
     'eslint:recommended',
     'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
     'plugin:react/jsx-runtime',
     'plugin:@typescript-eslint/recommended',
   ],
@@ -42,5 +43,9 @@ module.exports = {
     'sort-keys-fix/sort-keys-fix': 'warn',
     'typescript-sort-keys/interface': 'error',
     'typescript-sort-keys/string-enum': 'error',
+    'prefer-const': ['warn'],
+    'prettier/prettier': ['warn'],
+    'react-hooks/rules-of-hooks': ['warn'],
+    'react-hooks/exhaustive-deps': ['warn'],
   },
 };
