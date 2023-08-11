@@ -1,5 +1,6 @@
 export const QUERY_KEYS = {
   profileMe: 'profileMe',
+  recommendations: 'recommendations',
 };
 
 export const STORAGE_KEYS = {
