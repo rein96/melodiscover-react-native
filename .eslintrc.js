@@ -22,9 +22,12 @@ module.exports = {
   ],
   root: true,
   rules: {
-    indent: ['error', 2],
     'linebreak-style': ['error', 'unix'],
+    'prefer-const': ['warn'],
+    'prettier/prettier': ['warn'],
     quotes: ['warn', 'single'],
+    'react-hooks/exhaustive-deps': ['warn'],
+    'react-hooks/rules-of-hooks': ['warn'],
     'react/jsx-sort-props': [
       'warn',
       {
@@ -43,9 +46,5 @@ module.exports = {
     'sort-keys-fix/sort-keys-fix': 'warn',
     'typescript-sort-keys/interface': 'error',
     'typescript-sort-keys/string-enum': 'error',
-    'prefer-const': ['warn'],
-    'prettier/prettier': ['warn'],
-    'react-hooks/rules-of-hooks': ['warn'],
-    'react-hooks/exhaustive-deps': ['warn'],
   },
 };
