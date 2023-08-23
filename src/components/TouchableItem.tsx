@@ -2,7 +2,7 @@ import type {BoxProps} from '@shopify/restyle';
 import {composeRestyleFunctions, useRestyle} from '@shopify/restyle';
 import type {PropsWithChildren} from 'react';
 import React, {useMemo} from 'react';
-import {Platform, Pressable, StyleSheet} from 'react-native';
+import {Platform, Pressable} from 'react-native';
 import type {ViewProps} from 'react-native-svg/lib/typescript/fabric/utils';
 
 import Box from './Box';
@@ -52,7 +52,10 @@ const TouchableItem = ({
 
   return (
     <Pressable
-      android_ripple={{color: colors.inkTertiary}}
+      android_ripple={{
+        color: colors.inkTertiary,
+        foreground: true,
+      }}
       disabled={disabled}
       onPress={handlePress}
       style={style}>
