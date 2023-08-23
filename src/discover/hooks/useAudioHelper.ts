@@ -100,7 +100,7 @@ export function useAudioHelper(
         play(currentPlayer);
       };
 
-      const url = listSounds[index].preview_url;
+      const url = listSounds[index]?.preview_url;
       // If the audio is a 'require' then the second parameter must be the callback.
       // case 'network':
       const newPlayer: SoundPlayer = new SoundPlayer(url, undefined, error =>
@@ -224,7 +224,7 @@ export function useAudioHelper(
         setRemainingIndices(newRemainingIndices);
         setIndex(newRemainingIndices[0]);
       } else {
-        setIndex((index + 1) % request.listSounds.length);
+        setIndex(index + 1);
       }
     }
   }
