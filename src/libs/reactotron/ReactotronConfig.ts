@@ -21,6 +21,7 @@ Reactotron.configure({name: 'Melodiscover'}) // controls connection & communicat
   .connect(); // let's connect!
 
 const yeOldeConsoleLog = console.log;
+const consoleError = console.error;
 
 // make a new one
 console.log = (...args) => {
@@ -30,6 +31,18 @@ console.log = (...args) => {
   // send this off to Reactotron.
   Reactotron.display({
     name: 'CONSOLE.LOG',
+    preview: JSON.stringify(args),
+    value: args.length === 1 ? args[0] : args,
+  });
+};
+
+console.error = (...args) => {
+  // always call the old one, because React Native does magic swizzling too
+  consoleError(...args);
+
+  // send this off to Reactotron.
+  Reactotron.display({
+    name: 'CONSOLE.ERROR',
     preview: JSON.stringify(args),
     value: args.length === 1 ? args[0] : args,
   });
