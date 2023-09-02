@@ -24,6 +24,7 @@ const config: AuthConfiguration = {
     'user-top-read',
     'user-read-recently-played',
     'user-library-read',
+    'user-modify-playback-state',
     'playlist-modify-public',
     'playlist-read-private',
     'playlist-read-collaborative',
@@ -76,13 +77,15 @@ const useAuthSpotify = () => {
     setRefreshToken(result.refreshToken as string);
   };
 
-  const setTokensToStorage = (result: AuthorizeResult) => {
+  const setTokensToStorage = (result: AuthorizeResult | RefreshResult) => {
     storage.set(STORAGE_KEYS.ACCESS_TOKEN, result.accessToken);
     storage.set(
       STORAGE_KEYS.ACCESS_TOKEN_EXPIRATION_DATE,
       result.accessTokenExpirationDate,
     );
-    storage.set(STORAGE_KEYS.REFRESH_TOKEN, result.refreshToken);
+    if (result.refreshToken) {
+      storage.set(STORAGE_KEYS.REFRESH_TOKEN, result.refreshToken);
+    }
   };
 
   const refreshSpotifyToken = async (refreshToken: string) => {
@@ -91,19 +94,24 @@ const useAuthSpotify = () => {
         refreshToken,
       });
 
-      if (result.refreshToken) {
-        setTokensToState(result);
-
-        if (!isLoggedIn) {
-          setIsLoggedIn(true);
-        }
+      if (!result.accessToken) {
+        throw new Error('refreshSpotifyToken is ERROR :(');
       }
+
+      setTokensToState(result);
+      setTokensToStorage(result);
+
+      if (!isLoggedIn) {
+        setIsLoggedIn(true);
+      }
+
+      return result;
     } catch (error) {
       console.log('ERROR: refreshSpotifyToken', error);
     }
   };
 
-  const getTokensFromStorage = () => {
+  const getTokensFromStorage = async () => {
     const storageAccessToken =
       storage.getString(STORAGE_KEYS.ACCESS_TOKEN) ?? '';
     const storageAccessTokenExpirationDate =
@@ -119,13 +127,14 @@ const useAuthSpotify = () => {
       return;
 
     if (isTokenExpired(storageAccessTokenExpirationDate)) {
-      return refreshSpotifyToken(storageRefreshToken);
+      return await refreshSpotifyToken(storageRefreshToken);
     }
 
-    setIsLoggedIn(true);
+    // If token is not expired -> set tokens from storage to state immediately
     setAccessToken(storageAccessToken);
     setAccessTokenExpirationDate(storageAccessTokenExpirationDate);
     setRefreshToken(storageRefreshToken);
+    setIsLoggedIn(true);
   };
 
   const removeTokensFromStorage = () => {
