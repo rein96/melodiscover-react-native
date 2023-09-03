@@ -3,7 +3,11 @@ import Box from '../../components/Box';
 import Text from '../../components/Text';
 import TouchableItem from '../../components/TouchableItem';
 
-const SavePlaylist = () => {
+type Props = {
+  onPress: () => void;
+};
+
+const SavePlaylist = ({onPress}: Props) => {
   return (
     <Box alignItems="center" justifyContent="center">
       <TouchableItem
@@ -12,6 +16,7 @@ const SavePlaylist = () => {
         borderRadius="xxl"
         flexDirection="row"
         mt="xxs"
+        onPress={onPress}
         p="s">
         <Text fontFamily="Montserrat-Bold" fontSize={16} mr="xs">
           Playlist

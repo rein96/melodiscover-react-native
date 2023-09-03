@@ -9,9 +9,15 @@ import useQueryRecommendations from '../hooks/useQueryRecommendations';
 import ConfigurationIcon from '../../assets/components/ConfigurationIcon';
 import useQueryMySpotifyProfile from '../../user/login/hooks/useQueryMySpotifyProfile';
 import MusicPlayer from '../components/MusicPlayer';
+import SavePlaylist from '../components/SavePlaylist';
+import useQueryMyPlaylist from '../hooks/useQueryMyPlaylist';
+import {useState} from 'react';
+import SelectPlaylistModal from '../components/SelectPlaylistModal';
 
 const DiscoverScreen = () => {
   const {top} = useSafeAreaInsets();
+
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
   const {data: myProfileData} = useQueryMySpotifyProfile();
 
@@ -23,12 +29,26 @@ const DiscoverScreen = () => {
     seedTracks: '6YArEquYF9TDuqofFO9CY7',
   });
 
+  const {data: myPlaylistData} = useQueryMyPlaylist({limit: 20});
+
+  const userPlaylistItems = myPlaylistData?.items?.filter(
+    item => item.owner.id === myProfileData?.id,
+  );
+
   const recommendationTracks = recommendationData?.tracks.filter(
     track => !!track.preview_url,
   );
 
   const openFilterModal = () => {
     // navigation.navigate('MyModal');
+  };
+
+  const handleShowPlaylistModal = () => {
+    setShowPlaylistModal(true);
+  };
+
+  const handleHidePlaylistModal = () => {
+    setShowPlaylistModal(false);
   };
 
   return (
@@ -44,6 +64,7 @@ const DiscoverScreen = () => {
           flexDirection="row"
           justifyContent="space-between">
           <MelodiscoverIcon height={48} width={48} />
+          <SavePlaylist onPress={handleShowPlaylistModal} />
           <TouchableItem
             alignItems="center"
             flexDirection="row"
@@ -58,6 +79,12 @@ const DiscoverScreen = () => {
         {!isLoading && !!recommendationTracks && (
           <MusicPlayer tracks={recommendationTracks} />
         )}
+
+        <SelectPlaylistModal
+          onClose={handleHidePlaylistModal}
+          playlistItems={userPlaylistItems}
+          visible={showPlaylistModal}
+        />
       </Box>
     </LinearGradient>
   );

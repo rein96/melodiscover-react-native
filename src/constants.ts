@@ -1,5 +1,5 @@
 export const QUERY_KEYS = {
-  profileMe: 'profileMe',
+  mePlaylist: 'me/playlists',
   recommendations: 'recommendations',
 };
 
