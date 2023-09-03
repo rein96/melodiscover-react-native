@@ -9,18 +9,37 @@ import PlaylistItem from './PlaylistItem';
 type Props = {
   onClose: () => void;
   playlistItems: PlaylistItemResponse[] | undefined;
+  selectedPlaylistId: string;
+  setselectedPlaylistId: React.Dispatch<React.SetStateAction<string>>;
   visible: boolean;
 };
 
-const SelectPlaylistModal = ({onClose, playlistItems, visible}: Props) => {
+const SelectPlaylistModal = ({
+  onClose,
+  playlistItems,
+  selectedPlaylistId,
+  setselectedPlaylistId,
+  visible,
+}: Props) => {
+  const handlePressPlaylistItem = useCallback(
+    (item: PlaylistItemResponse) => {
+      setselectedPlaylistId(item.id);
+      onClose();
+    },
+    [onClose, setselectedPlaylistId],
+  );
+
   const renderItem = useCallback(
     ({item}: ListRenderItemInfo<PlaylistItemResponse>) => {
       return (
-        // @TODO: integrate selectedPlaylistId
-        <PlaylistItem item={item} selectedPlaylistId="6F3s15WgYKjeBq4SgpjATg" />
+        <PlaylistItem
+          item={item}
+          onPress={handlePressPlaylistItem}
+          selectedPlaylistId={selectedPlaylistId}
+        />
       );
     },
-    [],
+    [handlePressPlaylistItem, selectedPlaylistId],
   );
 
   const keyExtractor = (item: PlaylistItemResponse) => item.id;

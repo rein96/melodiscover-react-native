@@ -7,16 +7,22 @@ import {Dimensions, Image} from 'react-native';
 
 type Props = {
   item: PlaylistItemResponse;
+  onPress: (item: PlaylistItemResponse) => void;
   selectedPlaylistId: string;
 };
 
-const PlaylistItem = ({item, selectedPlaylistId}: Props) => {
+const PlaylistItem = ({item, onPress, selectedPlaylistId}: Props) => {
+  const handleOnPress = () => {
+    onPress(item);
+  };
+
   return (
     <TouchableItem
       alignItems="center"
       flexDirection="row"
       justifyContent="space-between"
-      my="xxs">
+      my="xxs"
+      onPress={handleOnPress}>
       <Box alignItems="center" flexDirection="row">
         {item?.images?.[0]?.url ? (
           <Image

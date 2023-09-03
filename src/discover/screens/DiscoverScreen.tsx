@@ -18,6 +18,7 @@ const DiscoverScreen = () => {
   const {top} = useSafeAreaInsets();
 
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [selectedPlaylistId, setselectedPlaylistId] = useState('');
 
   const {data: myProfileData} = useQueryMySpotifyProfile();
 
@@ -38,6 +39,10 @@ const DiscoverScreen = () => {
   const recommendationTracks = recommendationData?.tracks.filter(
     track => !!track.preview_url,
   );
+
+  const playlistName = userPlaylistItems?.find(
+    playlist => playlist.id === selectedPlaylistId,
+  )?.name;
 
   const openFilterModal = () => {
     // navigation.navigate('MyModal');
@@ -64,7 +69,10 @@ const DiscoverScreen = () => {
           flexDirection="row"
           justifyContent="space-between">
           <MelodiscoverIcon height={48} width={48} />
-          <SavePlaylist onPress={handleShowPlaylistModal} />
+          <SavePlaylist
+            onPress={handleShowPlaylistModal}
+            playlistName={playlistName}
+          />
           <TouchableItem
             alignItems="center"
             flexDirection="row"
@@ -83,6 +91,8 @@ const DiscoverScreen = () => {
         <SelectPlaylistModal
           onClose={handleHidePlaylistModal}
           playlistItems={userPlaylistItems}
+          selectedPlaylistId={selectedPlaylistId}
+          setselectedPlaylistId={setselectedPlaylistId}
           visible={showPlaylistModal}
         />
       </Box>
