@@ -1,4 +1,3 @@
-import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {SvgProps} from 'react-native-svg';
 import {StyleSheet} from 'react-native';
@@ -33,8 +32,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     height: 24,
-    width: 24,
     justifyContent: 'center',
+    width: 24,
   },
 });
 
@@ -55,10 +54,10 @@ const TabStack = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.inkPrimary,
-        tabBarInactiveTintColor: colors.inkTertiary,
         tabBarActiveBackgroundColor: colors.canvasPrimary,
+        tabBarActiveTintColor: colors.inkPrimary,
         tabBarInactiveBackgroundColor: colors.canvasPrimary,
+        tabBarInactiveTintColor: colors.inkTertiary,
         tabBarStyle: {
           backgroundColor: colors.canvasPrimary,
           borderTopColor: colors.canvasPrimary,

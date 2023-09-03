@@ -1,19 +1,14 @@
 import {ActivityIndicator, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import useTheme from '../theme/useTheme';
 
 const SplashScreen = () => {
-  const {
-    theme: {colors},
-  } = useTheme();
-
   return (
     <LinearGradient
       colors={['#141E30', '#121212']}
       end={{x: 0, y: 1}}
       start={{x: 0, y: 0}}
       style={styles.container}>
-      <ActivityIndicator color={colors.darkPrimary} size={'large'} />
+      <ActivityIndicator />
     </LinearGradient>
   );
 };
