@@ -65,16 +65,18 @@ const TabStack = () => {
       }}>
       <Tab.Screen
         component={DiscoverScreen}
-        name="Discover"
+        name="DiscoverTab"
         options={{
           tabBarIcon: DiscoverTabIcon,
+          title: 'Discover',
         }}
       />
       <Tab.Screen
         component={SettingsScreen}
-        name="Settings"
+        name="SettingsTab"
         options={{
           tabBarIcon: SettingsTabIcon,
+          title: 'Settings',
         }}
       />
     </Tab.Navigator>

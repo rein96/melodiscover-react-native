@@ -19,7 +19,7 @@ const LoginScreen = () => {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{name: 'Main'}],
+          routes: [{name: 'MainStack'}],
         }),
       );
     }

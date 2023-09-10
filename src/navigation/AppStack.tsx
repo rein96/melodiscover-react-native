@@ -7,6 +7,7 @@ import useAuthStore from '../store/useAuthStore';
 import useAuthSpotify from '../user/login/hooks/useAuthSpotify';
 import useReactotronCustomCommands from '../hooks/useReactotronCustomCommands';
 import SplashScreen from './SplashScreen';
+import PlaylistModalScreen from '../discover/screens/PlaylistModalScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,13 +39,29 @@ const AppStack = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={showTabStack ? 'Main' : 'Login'}
-        screenOptions={{headerShown: false}}>
-        <Stack.Screen component={TabStack} name="Main" />
-        <Stack.Screen component={LoginScreen} name="Login" />
+        initialRouteName={showTabStack ? 'MainStack' : 'LoginScreen'}>
+        <Stack.Group screenOptions={{headerShown: false}}>
+          <Stack.Screen component={TabStack} name="MainStack" />
+          <Stack.Screen component={LoginScreen} name="LoginScreen" />
+        </Stack.Group>
+        <Stack.Group screenOptions={{presentation: 'modal'}}>
+          <Stack.Screen
+            component={PlaylistModalScreen}
+            name="PlaylistModalScreen"
+          />
+        </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
+// function ModalScreen({navigation}) {
+//   return (
+//     <View style={{alignItems: 'center', flex: 1, justifyContent: 'center'}}>
+//       <Text style={{fontSize: 30}}>This is a modal!</Text>
+//       <Button onPress={() => navigation.goBack()} title="Dismiss" />
+//     </View>
+//   );
+// }
 
 export default AppStack;
