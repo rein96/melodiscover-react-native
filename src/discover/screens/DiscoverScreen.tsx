@@ -1,4 +1,3 @@
-import {StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Box from '../../components/Box';
 import Text from '../../components/Text';
@@ -11,8 +10,36 @@ import useQueryMySpotifyProfile from '../../user/login/hooks/useQueryMySpotifyPr
 import MusicPlayer from '../components/MusicPlayer';
 import SavePlaylist from '../components/SavePlaylist';
 import useQueryMyPlaylist from '../hooks/useQueryMyPlaylist';
-import {useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import SelectPlaylistModal from '../components/SelectPlaylistModal';
+import useMutatePlaylistTracks from '../hooks/useMutatePlaylistTracks';
+import {PlaylistItemResponse} from '../types/myplaylist.types';
+import {PlaylistsTracksItem} from '../types/playlistsTracks.types';
+import {StyleSheet} from 'react-native';
+import useMutateRecommendations from '../hooks/useMutateRecommendations';
+
+function getRandomTracks(playlistTracks: PlaylistsTracksItem[]) {
+  if (!playlistTracks?.length) return [];
+
+  // Define the minimum and maximum number of tracks to select
+  const maxTracks = 5;
+
+  // Determine the number of tracks to select based on the length of playlistTracks
+  const numTracks = Math.min(maxTracks, playlistTracks.length);
+
+  // Shuffle the playlistTracks array to ensure randomness
+  // map to get only string id
+  const shuffledTracks = [...playlistTracks]
+    .sort(() => Math.random() - 0.5)
+    .map(track => track.track.id);
+
+  // Return a slice of the shuffledTracks array with the selected number of tracks
+  return shuffledTracks.slice(0, numTracks);
+}
+
+// QUERIES / ENDPOINT component
+
+// useState component
 
 const DiscoverScreen = () => {
   const {top} = useSafeAreaInsets();
@@ -22,15 +49,40 @@ const DiscoverScreen = () => {
 
   const {data: myProfileData} = useQueryMySpotifyProfile();
 
-  const {data: recommendationData, isLoading} = useQueryRecommendations({
-    limit: 10,
-    market: myProfileData?.country,
-    seedArtists: '4NHQUGzhtTLFvgF5SZesLK',
-    seedGenres: 'pop',
-    seedTracks: '6YArEquYF9TDuqofFO9CY7',
+  const {data: myPlaylistData} = useQueryMyPlaylist({limit: 20});
+  // console.log('111 myPlaylistData', myPlaylistData);
+
+  const {
+    data: playlistsTracksData,
+    isLoading: playlistsTrackLoading,
+    mutateAsync: mutatePlaylistTracks,
+  } = useMutatePlaylistTracks();
+  // ini kenapa hit berkali2 ???
+  console.log('111 useMutatePlaylistTracks', {
+    playlistsTrackLoading,
+    playlistsTracksData,
   });
 
-  const {data: myPlaylistData} = useQueryMyPlaylist({limit: 20});
+  // const playlistTracks = playlistsTracksData?.items;
+
+  // const randomTracks = getRandomTracks(playlistTracks);
+  // console.log('randomTracks', randomTracks);
+
+  const {
+    data: recommendationData,
+    isLoading: recommendationLoading,
+    mutateAsync: mutateRecommendations,
+  } = useMutateRecommendations();
+  console.log('recommendationData', recommendationData);
+
+  // const {data: recommendationData, isLoading: recommendationLoading} =
+  //   useQueryRecommendations({
+  //     limit: 10,
+  //     market: myProfileData?.country,
+  //     seedTracks: randomTracks.length
+  //       ? randomTracks.join(',')
+  //       : '6YArEquYF9TDuqofFO9CY7',
+  //   });
 
   const userPlaylistItems = myPlaylistData?.items?.filter(
     item => item.owner.id === myProfileData?.id,
@@ -55,6 +107,33 @@ const DiscoverScreen = () => {
   const handleHidePlaylistModal = () => {
     setShowPlaylistModal(false);
   };
+
+  const handleSelectPlaylistItem = useCallback(
+    async (item: PlaylistItemResponse) => {
+      console.log('111 handleSelectPlaylistItem', item);
+      setselectedPlaylistId(item.id);
+      handleHidePlaylistModal();
+
+      const playlistTracks = await mutatePlaylistTracks({playlistId: item.id});
+
+      const randomTracks = getRandomTracks(playlistTracks.items);
+
+      await mutateRecommendations({
+        limit: 10,
+        market: myProfileData?.country,
+        seedTracks: randomTracks.length
+          ? randomTracks.join(',')
+          : '6YArEquYF9TDuqofFO9CY7',
+      });
+    },
+    [mutatePlaylistTracks, mutateRecommendations, myProfileData?.country],
+  );
+
+  useEffect(() => {
+    if (!selectedPlaylistId) {
+      return handleShowPlaylistModal();
+    }
+  }, []);
 
   return (
     <LinearGradient
@@ -84,12 +163,13 @@ const DiscoverScreen = () => {
           </TouchableItem>
         </Box>
 
-        {!isLoading && !!recommendationTracks && (
+        {!recommendationLoading && !!recommendationTracks && (
           <MusicPlayer tracks={recommendationTracks} />
         )}
 
         <SelectPlaylistModal
           onClose={handleHidePlaylistModal}
+          onPressItem={handleSelectPlaylistItem}
           playlistItems={userPlaylistItems}
           selectedPlaylistId={selectedPlaylistId}
           setselectedPlaylistId={setselectedPlaylistId}

@@ -1,7 +1,6 @@
-import {useQuery} from '@tanstack/react-query';
+import {useMutation} from '@tanstack/react-query';
 import useFetch from '../../hooks/useFetch';
 import {Recommendations} from '../discover.types';
-import {QUERY_KEYS} from '../../constants';
 
 type RecommendationsParams = {
   limit?: number;
@@ -11,7 +10,7 @@ type RecommendationsParams = {
   seedTracks?: string;
 };
 
-const useQueryRecommendations = (params: RecommendationsParams) => {
+function _mutate(params: RecommendationsParams) {
   const {
     limit = 10,
     market = 'ID',
@@ -23,7 +22,7 @@ const useQueryRecommendations = (params: RecommendationsParams) => {
     // seedTracks = '0c6xIDDpzE81m2q797ordA',
   } = params;
 
-  const fetch = useFetch<Recommendations>(() => ({
+  return {
     method: 'GET',
     params: {
       limit,
@@ -33,12 +32,11 @@ const useQueryRecommendations = (params: RecommendationsParams) => {
       ...(seedTracks && {seed_tracks: seedTracks}),
     },
     url: 'https://api.spotify.com/v1/recommendations',
-  }));
+  };
+}
 
-  return useQuery({
-    queryFn: () => fetch(),
-    queryKey: [QUERY_KEYS.recommendations, params],
-  });
-};
+export default function useMutateRecommendations() {
+  const fetch = useFetch<Recommendations>(_mutate);
 
-export default useQueryRecommendations;
+  return useMutation((params: RecommendationsParams) => fetch(params));
+}
