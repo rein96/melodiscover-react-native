@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 
-interface BearState {
+interface AuthState {
   accessToken: string;
   accessTokenExpirationDate: string;
   isLoggedIn: boolean;
@@ -11,7 +11,7 @@ interface BearState {
   setRefreshToken: (refreshToken: string) => void;
 }
 
-const useAuthStore = create<BearState>()(set => ({
+const useAuthStore = create<AuthState>()(set => ({
   accessToken: '',
   accessTokenExpirationDate: '',
   isLoggedIn: false,
