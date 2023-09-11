@@ -9,7 +9,12 @@ const useQueryMySpotifyProfile = () => {
     url: 'https://api.spotify.com/v1/me',
   }));
 
-  return useQuery({queryFn: () => fetch(), queryKey: [QUERY_KEYS.profileMe]});
+  return useQuery({
+    cacheTime: 15 * (60 * 1000),
+    queryFn: () => fetch(),
+    queryKey: [QUERY_KEYS.me],
+    staleTime: 10 * (60 * 1000),
+  });
 };
 
 export default useQueryMySpotifyProfile;

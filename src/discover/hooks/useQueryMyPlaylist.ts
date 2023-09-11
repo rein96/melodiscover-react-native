@@ -16,8 +16,12 @@ const useQueryMyPlaylist = (params: Params) => {
   }));
 
   return useQuery({
+    cacheTime: 15 * (60 * 1000),
     queryFn: fetch,
+
     queryKey: [QUERY_KEYS.mePlaylist, params],
+
+    staleTime: 10 * (60 * 1000),
   });
 };
 
