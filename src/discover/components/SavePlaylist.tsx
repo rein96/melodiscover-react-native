@@ -26,7 +26,7 @@ const SavePlaylist = ({onPress, playlistName}: Props) => {
           mr="xs"
           numberOfLines={1}
           style={{maxWidth: Dimensions.get('screen').width - 180}}>
-          {playlistName ?? 'Playlist'}
+          {playlistName || 'Playlist'}
         </Text>
         <ChevronIcon direction="down" />
       </TouchableItem>

@@ -16,10 +16,7 @@ export type RootParamList = {
   MainStack?: {
     screen: string;
   };
-  PlaylistModalScreen: {
-    country: string;
-    profileId: string;
-  };
+  PlaylistModalScreen: undefined;
   SettingsTab: undefined;
 };
 

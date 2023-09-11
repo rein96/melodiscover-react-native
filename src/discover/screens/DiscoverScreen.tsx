@@ -4,136 +4,74 @@ import Text from '../../components/Text';
 import TouchableItem from '../../components/TouchableItem';
 import LinearGradient from 'react-native-linear-gradient';
 import MelodiscoverIcon from '../../assets/components/MelodiscoverIcon';
-import useQueryRecommendations from '../hooks/useQueryRecommendations';
 import ConfigurationIcon from '../../assets/components/ConfigurationIcon';
 import useQueryMySpotifyProfile from '../../user/login/hooks/useQueryMySpotifyProfile';
 import MusicPlayer from '../components/MusicPlayer';
 import SavePlaylist from '../components/SavePlaylist';
-import useQueryMyPlaylist from '../hooks/useQueryMyPlaylist';
-import {useCallback, useEffect, useState} from 'react';
-import SelectPlaylistModal from '../components/SelectPlaylistModal';
-import useMutatePlaylistTracks from '../hooks/useMutatePlaylistTracks';
-import {PlaylistItemResponse} from '../types/myplaylist.types';
-import {PlaylistsTracksItem} from '../types/playlistsTracks.types';
+import {useCallback, useEffect} from 'react';
 import {StyleSheet} from 'react-native';
-import useMutateRecommendations from '../hooks/useMutateRecommendations';
+import {useNavigation} from '@react-navigation/native';
+import {NavigationProp} from '../../navigation.types';
+import useMusicStore from '../../store/useMusicStore';
+import useQueryRecommendations from '../hooks/useQueryRecommendations';
+import {getSeedTracks} from '../discover.utils';
+import {Track} from '../discover.types';
+import ActivityIndicator from '../../components/ActivityIndicator';
+import EmptyStateDiscover from '../components/EmptyStateDiscover';
 
-function getRandomTracks(playlistTracks: PlaylistsTracksItem[]) {
-  if (!playlistTracks?.length) return [];
-
-  // Define the minimum and maximum number of tracks to select
-  const maxTracks = 5;
-
-  // Determine the number of tracks to select based on the length of playlistTracks
-  const numTracks = Math.min(maxTracks, playlistTracks.length);
-
-  // Shuffle the playlistTracks array to ensure randomness
-  // map to get only string id
-  const shuffledTracks = [...playlistTracks]
-    .sort(() => Math.random() - 0.5)
-    .map(track => track.track.id);
-
-  // Return a slice of the shuffledTracks array with the selected number of tracks
-  return shuffledTracks.slice(0, numTracks);
-}
-
-// QUERIES / ENDPOINT component
-
-// useState component
-
-const DiscoverScreen = () => {
-  const {top} = useSafeAreaInsets();
-
-  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-  const [selectedPlaylistId, setselectedPlaylistId] = useState('');
-
+const WrapperDiscoverScreen = () => {
   const {data: myProfileData} = useQueryMySpotifyProfile();
 
-  const {data: myPlaylistData} = useQueryMyPlaylist({limit: 20});
-  // console.log('111 myPlaylistData', myPlaylistData);
+  const {playlist, tracks} = useMusicStore();
 
-  const {
-    data: playlistsTracksData,
-    isLoading: playlistsTrackLoading,
-    mutateAsync: mutatePlaylistTracks,
-  } = useMutatePlaylistTracks();
-  // ini kenapa hit berkali2 ???
-  console.log('111 useMutatePlaylistTracks', {
-    playlistsTrackLoading,
-    playlistsTracksData,
-  });
-
-  // const playlistTracks = playlistsTracksData?.items;
-
-  // const randomTracks = getRandomTracks(playlistTracks);
-  // console.log('randomTracks', randomTracks);
-
-  const {
-    data: recommendationData,
-    isLoading: recommendationLoading,
-    mutateAsync: mutateRecommendations,
-  } = useMutateRecommendations();
-  console.log('recommendationData', recommendationData);
-
-  // const {data: recommendationData, isLoading: recommendationLoading} =
-  //   useQueryRecommendations({
-  //     limit: 10,
-  //     market: myProfileData?.country,
-  //     seedTracks: randomTracks.length
-  //       ? randomTracks.join(',')
-  //       : '6YArEquYF9TDuqofFO9CY7',
-  //   });
-
-  const userPlaylistItems = myPlaylistData?.items?.filter(
-    item => item.owner.id === myProfileData?.id,
-  );
+  const {data: recommendationData, isFetching: recommendationLoading} =
+    useQueryRecommendations({
+      limit: 10,
+      market: myProfileData?.country,
+      seedTracks: tracks.length ? getSeedTracks(tracks) : '',
+    });
 
   const recommendationTracks = recommendationData?.tracks.filter(
     track => !!track.preview_url,
   );
 
-  const playlistName = userPlaylistItems?.find(
-    playlist => playlist.id === selectedPlaylistId,
-  )?.name;
-
-  const openFilterModal = () => {
-    // navigation.navigate('MyModal');
-  };
-
-  const handleShowPlaylistModal = () => {
-    setShowPlaylistModal(true);
-  };
-
-  const handleHidePlaylistModal = () => {
-    setShowPlaylistModal(false);
-  };
-
-  const handleSelectPlaylistItem = useCallback(
-    async (item: PlaylistItemResponse) => {
-      console.log('111 handleSelectPlaylistItem', item);
-      setselectedPlaylistId(item.id);
-      handleHidePlaylistModal();
-
-      const playlistTracks = await mutatePlaylistTracks({playlistId: item.id});
-
-      const randomTracks = getRandomTracks(playlistTracks.items);
-
-      await mutateRecommendations({
-        limit: 10,
-        market: myProfileData?.country,
-        seedTracks: randomTracks.length
-          ? randomTracks.join(',')
-          : '6YArEquYF9TDuqofFO9CY7',
-      });
-    },
-    [mutatePlaylistTracks, mutateRecommendations, myProfileData?.country],
+  return (
+    <DiscoverScreen
+      playlistID={playlist.id}
+      playlistName={playlist.name}
+      recommendationLoading={recommendationLoading}
+      recommendationTracks={recommendationTracks}
+    />
   );
+};
+
+// useState component
+
+type Props = {
+  playlistID: string;
+  playlistName: string;
+  recommendationLoading: boolean;
+  recommendationTracks: Track[] | undefined;
+};
+
+const DiscoverScreen = ({
+  playlistID,
+  playlistName,
+  recommendationLoading,
+  recommendationTracks,
+}: Props) => {
+  const navigation = useNavigation<NavigationProp<'DiscoverTab'>>();
+  const {top} = useSafeAreaInsets();
+
+  const openFilterModal = useCallback(() => {
+    navigation.navigate('PlaylistModalScreen');
+  }, [navigation]);
 
   useEffect(() => {
-    if (!selectedPlaylistId) {
-      return handleShowPlaylistModal();
+    if (!playlistName || !playlistID) {
+      openFilterModal();
     }
-  }, []);
+  }, [openFilterModal, playlistID, playlistName]);
 
   return (
     <LinearGradient
@@ -148,14 +86,8 @@ const DiscoverScreen = () => {
           flexDirection="row"
           justifyContent="space-between">
           <MelodiscoverIcon height={48} width={48} />
-          <SavePlaylist
-            onPress={handleShowPlaylistModal}
-            playlistName={playlistName}
-          />
-          <TouchableItem
-            alignItems="center"
-            flexDirection="row"
-            onPress={openFilterModal}>
+          <SavePlaylist onPress={openFilterModal} playlistName={playlistName} />
+          <TouchableItem alignItems="center" flexDirection="row">
             <Text fontFamily="Montserrat-Bold" fontSize={16} mr="xxs">
               (1)
             </Text>
@@ -163,18 +95,17 @@ const DiscoverScreen = () => {
           </TouchableItem>
         </Box>
 
-        {!recommendationLoading && !!recommendationTracks && (
-          <MusicPlayer tracks={recommendationTracks} />
-        )}
+        {/* 2nd position */}
+        {/* <SavePlaylist onPress={openFilterModal} playlistName={playlistName} /> */}
 
-        <SelectPlaylistModal
-          onClose={handleHidePlaylistModal}
-          onPressItem={handleSelectPlaylistItem}
-          playlistItems={userPlaylistItems}
-          selectedPlaylistId={selectedPlaylistId}
-          setselectedPlaylistId={setselectedPlaylistId}
-          visible={showPlaylistModal}
-        />
+        {/* TODO: Change to skeleton loading */}
+        {recommendationLoading && <ActivityIndicator />}
+
+        {recommendationTracks?.length ? (
+          <MusicPlayer tracks={recommendationTracks} />
+        ) : (
+          <EmptyStateDiscover onPress={openFilterModal} />
+        )}
       </Box>
     </LinearGradient>
   );
@@ -186,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DiscoverScreen;
+export default WrapperDiscoverScreen;

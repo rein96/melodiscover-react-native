@@ -36,6 +36,7 @@ const useQueryRecommendations = (params: RecommendationsParams) => {
   }));
 
   return useQuery({
+    enabled: !!seedArtists || !!seedGenres || !!seedTracks,
     queryFn: () => fetch(),
     queryKey: [QUERY_KEYS.recommendations, params],
   });

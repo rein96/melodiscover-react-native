@@ -13,7 +13,7 @@ export interface PlaylistsTracksItem {
   added_by: AddedBy;
   is_local: boolean;
   primary_color: null;
-  track: Track;
+  track: PlaylistTrack;
   video_thumbnail: VideoThumbnail;
 }
 
@@ -35,7 +35,7 @@ enum Type {
   User = 'user',
 }
 
-interface Track {
+export interface PlaylistTrack {
   album: Album;
   artists: AddedBy[];
   available_markets: string[];

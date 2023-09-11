@@ -44,7 +44,11 @@ const AppStack = () => {
           <Stack.Screen component={TabStack} name="MainStack" />
           <Stack.Screen component={LoginScreen} name="LoginScreen" />
         </Stack.Group>
-        <Stack.Group screenOptions={{presentation: 'modal'}}>
+        <Stack.Group
+          screenOptions={{
+            headerShown: false,
+            presentation: 'modal',
+          }}>
           <Stack.Screen
             component={PlaylistModalScreen}
             name="PlaylistModalScreen"

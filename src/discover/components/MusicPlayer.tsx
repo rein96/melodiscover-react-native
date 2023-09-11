@@ -11,8 +11,9 @@ import useTheme from '../../theme/useTheme';
 import Text from '../../components/Text';
 import {useAudioHelper} from '../hooks/useAudioHelper';
 import ActivityIndicator from '../../components/ActivityIndicator';
-import {useCallback, useRef} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import CardsSwipe from 'react-native-cards-swipe';
+import {useNavigation} from '@react-navigation/native';
 
 type Props = {
   tracks: Track[];
@@ -30,9 +31,9 @@ const MusicPlayer = ({tracks}: Props) => {
     theme: {colors},
   } = useTheme();
   const swiper = useRef<CardsSwipeRefObject>(null);
+  const navigation = useNavigation();
 
   const audioHelper = useAudioHelper({isLogStatus: true, listSounds: tracks});
-
   const {next, pause, play, status} = audioHelper;
 
   const onPress = () => {
@@ -115,6 +116,20 @@ const MusicPlayer = ({tracks}: Props) => {
     ),
     [],
   );
+  // useEffect(() => {
+  //   if (!isFocused) {
+  //     return pause();
+  //   }
+  // }, [isFocused, pause, play]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      // Do something when the screen blurs
+      pause();
+    });
+
+    return unsubscribe;
+  }, [navigation, pause]);
 
   return (
     <Box
