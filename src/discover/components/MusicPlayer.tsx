@@ -16,6 +16,7 @@ import CardsSwipe from 'react-native-cards-swipe';
 import {useNavigation} from '@react-navigation/native';
 
 type Props = {
+  refetch: () => void;
   tracks: Track[];
 };
 
@@ -26,7 +27,7 @@ type CardsSwipeRefObject = {
 
 const imageWidth = Dimensions.get('screen').width - 32;
 
-const MusicPlayer = ({tracks}: Props) => {
+const MusicPlayer = ({refetch, tracks}: Props) => {
   const {
     theme: {colors},
   } = useTheme();
@@ -34,7 +35,7 @@ const MusicPlayer = ({tracks}: Props) => {
   const navigation = useNavigation();
 
   const audioHelper = useAudioHelper({isLogStatus: true, listSounds: tracks});
-  const {next, pause, play, status} = audioHelper;
+  const {next, pause, play, status, stop} = audioHelper;
 
   const onPress = () => {
     if (status === 'play') return pause();
@@ -99,6 +100,11 @@ const MusicPlayer = ({tracks}: Props) => {
     [],
   );
 
+  const onNoMoreCards = useCallback(() => {
+    stop();
+    refetch();
+  }, [refetch, stop]);
+
   const renderNope = useCallback(
     () => (
       <View style={styles.nope}>
@@ -142,6 +148,7 @@ const MusicPlayer = ({tracks}: Props) => {
         cards={tracks}
         containerStyle={styles.cardsSwipeContainer}
         loop={false}
+        onNoMoreCards={onNoMoreCards}
         onSwipedLeft={next}
         onSwipedRight={next}
         ref={swiper}

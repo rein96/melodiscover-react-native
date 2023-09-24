@@ -27,17 +27,20 @@ const WrapperDiscoverScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const firstTime = useRef(true);
 
-  const {data: recommendationData, isFetching: recommendationLoading} =
-    useQueryRecommendations({
-      limit: 10,
-      market: myProfileData?.country,
-      seedTracks: tracks.length ? getSeedTracks(tracks) : '',
-    });
+  const {
+    data: recommendationData,
+    isFetching: recommendationLoading,
+    refetch,
+  } = useQueryRecommendations({
+    limit: 20,
+    market: myProfileData?.country,
+    seedTracks: tracks.length ? getSeedTracks(tracks) : '',
+  });
 
   const playlistTracks =
     recommendationData?.tracks.filter(track => !!track.preview_url) || [];
 
-  const recommendationTracks = playlistTracks || tracks;
+  const recommendationTracks = playlistTracks;
 
   useEffect(
     function setInitialStorage() {
@@ -70,17 +73,19 @@ const WrapperDiscoverScreen = () => {
       playlistName={playlist.name}
       recommendationLoading={recommendationLoading}
       recommendationTracks={recommendationTracks}
+      refetch={refetch}
     />
   );
 };
 
 // useState component
 
-type Props = {
+type DiscoverScreenProps = {
   playlistID: string;
   playlistName: string;
   recommendationLoading: boolean;
   recommendationTracks: Track[] | undefined;
+  refetch: () => void;
 };
 
 const DiscoverScreen = ({
@@ -88,13 +93,27 @@ const DiscoverScreen = ({
   playlistName,
   recommendationLoading,
   recommendationTracks,
-}: Props) => {
+  refetch,
+}: DiscoverScreenProps) => {
   const navigation = useNavigation<NavigationProp<'DiscoverTab'>>();
   const {top} = useSafeAreaInsets();
 
   const openFilterModal = useCallback(() => {
     navigation.navigate('PlaylistModalScreen');
   }, [navigation]);
+
+  const renderContent = () => {
+    if (recommendationLoading) {
+      // TODO: Change to skeleton loading
+      return <ActivityIndicator />;
+    }
+
+    if (!recommendationTracks?.length) {
+      return <EmptyStateDiscover onPress={openFilterModal} />;
+    }
+
+    return <MusicPlayer refetch={refetch} tracks={recommendationTracks} />;
+  };
 
   useEffect(() => {
     if (!playlistName || !playlistID) {
@@ -127,14 +146,7 @@ const DiscoverScreen = ({
         {/* 2nd position */}
         {/* <SavePlaylist onPress={openFilterModal} playlistName={playlistName} /> */}
 
-        {/* TODO: Change to skeleton loading */}
-        {recommendationLoading && <ActivityIndicator />}
-
-        {recommendationTracks?.length ? (
-          <MusicPlayer tracks={recommendationTracks} />
-        ) : (
-          <EmptyStateDiscover onPress={openFilterModal} />
-        )}
+        {renderContent()}
       </Box>
     </LinearGradient>
   );
