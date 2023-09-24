@@ -8,7 +8,7 @@ import ConfigurationIcon from '../../assets/components/ConfigurationIcon';
 import useQueryMySpotifyProfile from '../../user/login/hooks/useQueryMySpotifyProfile';
 import MusicPlayer from '../components/MusicPlayer';
 import SavePlaylist from '../components/SavePlaylist';
-import {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NavigationProp} from '../../navigation.types';
@@ -18,11 +18,14 @@ import {getSeedTracks} from '../discover.utils';
 import {Track} from '../discover.types';
 import ActivityIndicator from '../../components/ActivityIndicator';
 import EmptyStateDiscover from '../components/EmptyStateDiscover';
+import {storage} from '../../libs/react-native-mmkv/mmkv';
+import {STORAGE_KEYS} from '../../constants';
 
 const WrapperDiscoverScreen = () => {
   const {data: myProfileData} = useQueryMySpotifyProfile();
-
-  const {playlist, tracks} = useMusicStore();
+  const {playlist, setPlaylist, setTracks, tracks} = useMusicStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const firstTime = useRef(true);
 
   const {data: recommendationData, isFetching: recommendationLoading} =
     useQueryRecommendations({
@@ -31,9 +34,35 @@ const WrapperDiscoverScreen = () => {
       seedTracks: tracks.length ? getSeedTracks(tracks) : '',
     });
 
-  const recommendationTracks = recommendationData?.tracks.filter(
-    track => !!track.preview_url,
+  const playlistTracks =
+    recommendationData?.tracks.filter(track => !!track.preview_url) || [];
+
+  const recommendationTracks = playlistTracks || tracks;
+
+  useEffect(
+    function setInitialStorage() {
+      if (firstTime.current) {
+        const storedPlaylistName =
+          storage.getString(STORAGE_KEYS.PLAYLIST_NAME) || '';
+        const storedPlaylistId =
+          storage.getString(STORAGE_KEYS.PLAYLIST_ID) || '';
+        const storedPlaylistTracks = JSON.parse(
+          storage.getString(STORAGE_KEYS.TRACKS) || '[]',
+        );
+
+        setPlaylist({id: storedPlaylistId, name: storedPlaylistName});
+        setTracks(storedPlaylistTracks);
+        firstTime.current = false;
+      }
+      setIsLoading(false);
+    },
+    [setPlaylist, setTracks],
   );
+
+  // TODO: add skeleton loading
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <DiscoverScreen

@@ -64,7 +64,7 @@ const MusicPlayer = ({tracks}: Props) => {
   const renderCard = useCallback(
     (card: Track) => (
       <Box style={styles.cardContainer}>
-        {card.album.images[0].url ? (
+        {card?.album?.images?.[0]?.url ? (
           <Image
             height={imageWidth}
             resizeMode="cover"
