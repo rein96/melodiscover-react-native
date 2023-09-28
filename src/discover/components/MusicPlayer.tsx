@@ -1,4 +1,3 @@
-import LinearGradient from 'react-native-linear-gradient';
 import Box from '../../components/Box';
 import TouchableItem from '../../components/TouchableItem';
 import XIcon from '../../assets/components/XIcon';
@@ -6,7 +5,7 @@ import PauseIcon from '../../assets/components/PauseIcon';
 import PlayIcon from '../../assets/components/PlayIcon';
 import HeartPlusIcon from '../../assets/components/HeartPlusIcon';
 import {Dimensions, Image, StyleSheet, View} from 'react-native';
-import {Track} from '../discover.types';
+import {Artist2, Track} from '../discover.types';
 import useTheme from '../../theme/useTheme';
 import Text from '../../components/Text';
 import {useAudioHelper} from '../hooks/useAudioHelper';
@@ -14,6 +13,7 @@ import ActivityIndicator from '../../components/ActivityIndicator';
 import {useCallback, useEffect, useRef} from 'react';
 import CardsSwipe from 'react-native-cards-swipe';
 import {useNavigation} from '@react-navigation/native';
+import SpotifyLogo from '../../assets/images/Spotify_Icon_RGB_Green.png';
 
 type Props = {
   refetch: () => void;
@@ -62,9 +62,16 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
     if (swiper.current) swiper.current.swipeRight();
   };
 
-  const renderCard = useCallback(
-    (card: Track) => (
-      <Box style={styles.cardContainer}>
+  const renderCard = useCallback((card: Track) => {
+    console.log('card', card);
+
+    const getArtistsText = (artists: Artist2[]) => {
+      const artistNames = artists.map(artist => artist.name);
+      return artistNames.join(', ');
+    };
+
+    return (
+      <Box borderRadius="m">
         {card?.album?.images?.[0]?.url ? (
           <Image
             height={imageWidth}
@@ -80,16 +87,37 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
             width={imageWidth}
           />
         )}
-        <LinearGradient
+        {/* <LinearGradient
           colors={['rgba(0, 0, 0, 0.01)', '#000000']}
           style={styles.cardGradient}>
           <Text style={styles.trackName}>{card?.name}</Text>
           <Text style={styles.artistName}>{card?.artists[0].name}</Text>
-        </LinearGradient>
+        </LinearGradient> */}
+        <Box
+          alignItems="center"
+          bg="canvasShadow"
+          flexDirection="row"
+          justifyContent="space-between"
+          p="xs">
+          <Box>
+            <Text
+              color="inkPrimary"
+              fontFamily="Montserrat-SemiBold"
+              mb="xxxs"
+              variant="label16">
+              {card?.name}
+            </Text>
+            <Text color="inkSecondary" variant="label12">
+              {getArtistsText(card?.artists)}
+            </Text>
+          </Box>
+          <TouchableItem>
+            <Image source={SpotifyLogo} style={styles.SpotifyLogoImage} />
+          </TouchableItem>
+        </Box>
       </Box>
-    ),
-    [],
-  );
+    );
+  }, []);
 
   const renderNoMoreCard = useCallback(
     () => (
@@ -161,6 +189,7 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
       {/* Action buttons */}
       <Box
         alignItems="center"
+        // flex={1}
         flexDirection="row"
         justifyContent="center"
         mt="m">
@@ -196,33 +225,36 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
 };
 
 const styles = StyleSheet.create({
-  artistName: {
-    color: 'white',
-    fontSize: 14,
-  },
+  SpotifyLogoImage: {height: 20, width: 20},
+  // artistName: {
+  //   color: 'white',
+  //   fontSize: 14,
+  // },
   cardContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
     position: 'relative',
   },
-  cardGradient: {
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderRadius: 8,
-    bottom: 0,
-    left: 0,
-    padding: 10,
-    position: 'absolute',
-    right: 0,
-  },
+  // cardGradient: {
+  //   borderBottomLeftRadius: 8,
+  //   borderBottomRightRadius: 8,
+  //   borderRadius: 8,
+  //   bottom: 0,
+  //   left: 0,
+  //   padding: 10,
+  //   position: 'absolute',
+  //   right: 0,
+  // },
   cardsSwipeContainer: {
     elevation: 1,
     flex: 1,
     justifyContent: 'flex-end',
+    marginBottom: 16,
     paddingTop: 40,
     zIndex: 1,
   },
   image: {
-    borderRadius: 8,
+    // borderTopLeftRadius: 8,
+    // borderTopRightRadius: 8,
   },
   like: {
     borderColor: 'lightgreen',
@@ -259,12 +291,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  trackName: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
+  // trackName: {
+  //   color: 'white',
+  //   fontSize: 16,
+  //   fontWeight: 'bold',
+  //   marginBottom: 4,
+  // },
 });
 
 export default MusicPlayer;
