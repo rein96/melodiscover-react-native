@@ -4,7 +4,14 @@ import XIcon from '../../assets/components/XIcon';
 import PauseIcon from '../../assets/components/PauseIcon';
 import PlayIcon from '../../assets/components/PlayIcon';
 import HeartPlusIcon from '../../assets/components/HeartPlusIcon';
-import {Dimensions, Image, StyleSheet, View} from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Linking,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {Artist2, Track} from '../discover.types';
 import useTheme from '../../theme/useTheme';
 import Text from '../../components/Text';
@@ -62,12 +69,60 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
     if (swiper.current) swiper.current.swipeRight();
   };
 
+  const openSpotifyApp = ({
+    externalUrl,
+    uri,
+  }: {
+    externalUrl: string;
+    uri: string;
+  }) => {
+    // Use the Spotify URI or external URL to open the Spotify app
+    // const spotifyUri = 'spotify:track:3imt8APLtyXVGsLZM362nA'; // Replace with your Spotify URI
+
+    // Check if the Spotify app is installed on the device
+    Linking.canOpenURL(externalUrl)
+      .then(supported => {
+        if (supported) {
+          // Spotify app is installed, open it
+          return Linking.openURL(externalUrl);
+        } else {
+          // Spotify app is not installed, you can open the external URL
+          // const externalUrl =
+          //   'https://open.spotify.com/track/3imt8APLtyXVGsLZM362nA'; // Replace with your Spotify URL
+          return Linking.openURL(externalUrl);
+        }
+      })
+      .catch(err => console.error('An error occurred', err));
+  };
+
   const renderCard = useCallback((card: Track) => {
     console.log('card', card);
 
     const getArtistsText = (artists: Artist2[]) => {
       const artistNames = artists.map(artist => artist.name);
       return artistNames.join(', ');
+    };
+
+    const handleSpotifyLogoIcon = () => {
+      Alert.alert(
+        'Open and Listen on Spotify?',
+        `You are about to play ${card.name} on Spotify`,
+        [
+          {
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+            text: 'Cancel',
+          },
+          {
+            onPress: () =>
+              openSpotifyApp({
+                externalUrl: card.external_urls.spotify,
+                uri: card.uri,
+              }),
+            text: 'OK',
+          },
+        ],
+      );
     };
 
     return (
@@ -111,7 +166,7 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
               {getArtistsText(card?.artists)}
             </Text>
           </Box>
-          <TouchableItem>
+          <TouchableItem onPress={handleSpotifyLogoIcon}>
             <Image source={SpotifyLogo} style={styles.SpotifyLogoImage} />
           </TouchableItem>
         </Box>
