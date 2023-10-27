@@ -21,6 +21,8 @@ import {useCallback, useEffect, useRef} from 'react';
 import CardsSwipe from 'react-native-cards-swipe';
 import {useNavigation} from '@react-navigation/native';
 import SpotifyLogo from '../../assets/images/Spotify_Icon_RGB_Green.png';
+import useMutateAddItems from '../hooks/useMutateAddItems';
+import useMusicStore from '../../store/useMusicStore';
 
 type Props = {
   refetch: () => void;
@@ -41,8 +43,11 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
   const swiper = useRef<CardsSwipeRefObject>(null);
   const navigation = useNavigation();
 
+  const playlistId = useMusicStore(state => state.playlist.id);
+  const {mutateAsync} = useMutateAddItems();
+
   const audioHelper = useAudioHelper({isLogStatus: true, listSounds: tracks});
-  const {next, pause, play, status, stop} = audioHelper;
+  const {musicIndex, next, pause, play, status, stop} = audioHelper;
 
   const onPress = () => {
     if (status === 'play') return pause();
@@ -61,11 +66,11 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
     return <PlayIcon color={colors.inkPrimary} height={28} width={28} />;
   };
 
-  const skipMusic = () => {
+  const handleSkipItem = () => {
     if (swiper.current) swiper.current.swipeLeft();
   };
 
-  const saveToPlaylist = () => {
+  const handleHeartItem = () => {
     if (swiper.current) swiper.current.swipeRight();
   };
 
@@ -96,8 +101,6 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
   };
 
   const renderCard = useCallback((card: Track) => {
-    console.log('card', card);
-
     const getArtistsText = (artists: Artist2[]) => {
       const artistNames = artists.map(artist => artist.name);
       return artistNames.join(', ');
@@ -205,6 +208,12 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
     ),
     [],
   );
+
+  const saveToPlaylist = useCallback(async () => {
+    await mutateAsync({playlist_id: playlistId, uris: tracks[musicIndex].uri});
+    next();
+  }, [musicIndex, mutateAsync, next, playlistId, tracks]);
+
   // useEffect(() => {
   //   if (!isFocused) {
   //     return pause();
@@ -233,7 +242,7 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
         loop={false}
         onNoMoreCards={onNoMoreCards}
         onSwipedLeft={next}
-        onSwipedRight={next}
+        onSwipedRight={saveToPlaylist}
         ref={swiper}
         renderCard={renderCard}
         renderNoMoreCard={renderNoMoreCard}
@@ -251,7 +260,7 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
         <TouchableItem
           backgroundColor="lightPrimary"
           borderRadius="full"
-          onPress={skipMusic}
+          onPress={handleSkipItem}
           p="l">
           <XIcon color={colors.inkPrimary} height={28} width={28} />
         </TouchableItem>
@@ -270,7 +279,7 @@ const MusicPlayer = ({refetch, tracks}: Props) => {
         <TouchableItem
           backgroundColor="lightPrimary"
           borderRadius="full"
-          onPress={saveToPlaylist}
+          onPress={handleHeartItem}
           p="l">
           <HeartPlusIcon color={colors.inkDanger} height={28} width={28} />
         </TouchableItem>
